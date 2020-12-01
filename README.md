@@ -53,7 +53,7 @@ config example
 ## Demo
 
 ```bash
-./collect-repos --username zoroqi > zoroqi-start.md
+./collect-repos --username zoroqi > zoroqi-starred.md
 ```
 
 
