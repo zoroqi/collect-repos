@@ -1,0 +1,10 @@
+- name: zoroqi
+  userType: user
+  file: README.md
+- name: google
+  userType: org
+  file: google.md
+- name: apple
+  userType: org
+  file: apple.md
+
