@@ -207,7 +207,7 @@ func commit(client *github.Client, owner string, repo string, branch string,
 	date := time.Now()
 	author := &github.CommitAuthor{Date: &date, Name: &commitAuthor, Email: &commitEmail}
 	commit := &github.Commit{Author: author,
-		Message: &owner,
+		Message: &message,
 		Tree:    tree,
 		Parents: []*github.Commit{parent.Commit}}
 	newCommit, _, err := client.Git.CreateCommit(context.Background(), owner, repo, commit)
@@ -280,11 +280,11 @@ func queryList(api func(listOpt github.ListOptions) ([]*github.Repository, *gith
 func buildUserStartContent(u []*github.Repository, licenseUser string, config collectConfig) string {
 	repoGroup := collectRepository(u)
 	sb := buildCollectContent(repoGroup)
-	return starsDesc + sb.String() + fmt.Sprintf(license, licenseUser, licenseUser)
+	return fmt.Sprintf(starsDesc, len(u)) + sb.String() + fmt.Sprintf(license, licenseUser, licenseUser)
 }
 
 func buildOrgReposContent(u []*github.Repository, licenseUser string, config collectConfig) string {
 	repoGroup := collectRepository(u)
 	sb := buildCollectContent(repoGroup)
-	return fmt.Sprintf(reposDesc, config.Name) + sb.String() + fmt.Sprintf(license, licenseUser, licenseUser)
+	return fmt.Sprintf(reposDesc, config.Name, len(u)) + sb.String() + fmt.Sprintf(license, licenseUser, licenseUser)
 }
