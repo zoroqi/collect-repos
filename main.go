@@ -60,7 +60,13 @@ func buildCollectContent(group []group) *strings.Builder {
 		sb.WriteString(fmt.Sprintf("## %s\n\n", v.name))
 		for _, repo := range v.repo {
 			description := strings.Replace(repo.GetDescription(), "\n", " ", -1)
-			sb.WriteString(fmt.Sprintf("- [%s](%s) %s\n", repo.GetFullName(), repo.GetHTMLURL(), description))
+			var time string
+			if repo.PushedAt == nil {
+				time = ""
+			} else {
+				time = repo.PushedAt.Format("2006-01-02")
+			}
+			sb.WriteString(fmt.Sprintf("- [%s](%s) pushed_at:%s %s\n", repo.GetFullName(), repo.GetHTMLURL(), time, description))
 		}
 		sb.WriteString("\n")
 	}
