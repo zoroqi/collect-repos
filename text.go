@@ -9,14 +9,14 @@ var idea = `
 var starsDesc = `# Awesome Stars [![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/sindresorhus/awesome)
 ` + idea +
 	`
-## Contents
+## Contents(%d)
 
 `
 
 var reposDesc = `# %s repositories
 ` + idea +
 	`
-## Contents
+## Contents(%d)
 
 `
 
@@ -27,3 +27,5 @@ var license = `
 
 To the extent possible under law, [%s](https://github.com/%s) has waived all copyright and related or neighboring rights to this work.
 `
+
+var message = `github-actions commit`
