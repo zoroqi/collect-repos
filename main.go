@@ -64,7 +64,7 @@ func buildCollectContent(group []group) *strings.Builder {
 			if repo.PushedAt == nil {
 				time = ""
 			} else {
-				time = repo.PushedAt.Format("2006-01-02")
+				time = repo.PushedAt.Format("2006-01")
 			}
 			sb.WriteString(fmt.Sprintf("- [%s](%s) pushed_at:%s %s\n", repo.GetFullName(), repo.GetHTMLURL(), time, description))
 		}
