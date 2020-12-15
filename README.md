@@ -56,7 +56,12 @@ config example
 ./collect-repos --username zoroqi > zoroqi-starred.md
 ```
 
-
 - [`zoroqi/my-awesome`](https://github.com/zoroqi/my-awesome)
-- [update awesome-stars every day by GitHub Action](https://github.com/zoroqi/my-awesome/blob/master/.github/workflows/schedules.yml) the example with GitHub Action
+- [`zoroqi/org-repositorie`](https://github.com/zoroqi/org-repositories)
+
+## Statistics
+
+`grep 'pushed_at' README.md | awk -F 'pushed_at' '{print $2}' | awk '{print $1}' | sort | uniq -c`
+
+`grep 'pushed_at' README.md | awk -F 'pushed_at' '{print $2}' | awk -F '-' '{print $1}' | sort | uniq -c`
 
