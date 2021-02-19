@@ -60,18 +60,25 @@ func buildCollectContent(group []group) *strings.Builder {
 		sb.WriteString(fmt.Sprintf("## %s\n\n", v.name))
 		for _, repo := range v.repo {
 			description := strings.Replace(repo.GetDescription(), "\n", " ", -1)
-			var time string
-			if repo.PushedAt == nil {
-				time = ""
-			} else {
-				time = repo.PushedAt.Format("2006-01")
-			}
-			sb.WriteString(fmt.Sprintf("- [%s](%s) pushed_at:%s %s\n", repo.GetFullName(), repo.GetHTMLURL(), time, description))
+			sb.WriteString(fmt.Sprintf("- [%s](%s) %s %s\n", repo.GetFullName(), repo.GetHTMLURL(),
+				extend(repo), description))
 		}
 		sb.WriteString("\n")
 	}
 
 	return &sb
+}
+
+func extend(repo *github.Repository) string {
+	var time string
+	if repo.PushedAt == nil {
+		time = ""
+	} else {
+		time = repo.PushedAt.Format("2006-01")
+	}
+	stargazers := repo.GetStargazersCount()
+	forks := repo.GetForksCount()
+	return fmt.Sprintf("pushed_at:%s star:%.1fk fork:%.1fk", time, float64(stargazers)/1000, float64(forks)/1000)
 }
 
 type usertype string
