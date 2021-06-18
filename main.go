@@ -112,46 +112,39 @@ func main() {
 		return
 	}
 
-	var configs []collectConfig
+	configs, err := buildConfig(config, username, file)
 
-	if *config == "" {
-		configs = append(configs, collectConfig{
-			Name:       *username,
-			UserType:   user,
-			OutputFile: *file,
-		})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	client := newClient(*token)
+
+	collectRepos, nofileRepos := download(configs, client, username)
+
+	if len(collectRepos) > 0 && *username != "" && *repository != "" && *branch != "" {
+		err := commit(client, *username, *repository, *branch, *commitAuthor, *commitEmail, collectRepos)
+		if err != nil {
+			fmt.Println("commit err", err)
+		}
 	} else {
-		configStr, err := ioutil.ReadFile(*config)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		err = yaml.Unmarshal(configStr, &configs)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		for i := 0; i < len(configs); {
-			if configs[i].UserType != user && configs[i].UserType != org {
-				configs = append(configs[:i], configs[i+1:]...)
-				continue
+		// 没有相关对应提交用户, 项目, 分支直接输出本地文件
+		for k, v := range collectRepos {
+			if err := ioutil.WriteFile(k, []byte(v), 0644); err != nil {
+				fmt.Println("write file err:", err)
 			}
-			i++
 		}
 	}
-	var client *github.Client
-	if *token != "" {
-		ts := oauth2.StaticTokenSource(
-			&oauth2.Token{AccessToken: *token},
-		)
-		tc := oauth2.NewClient(context.Background(), ts)
-		client = github.NewClient(tc)
-	} else {
-		client = github.NewClient(nil)
+	// 没有配置文件的直接输出到console
+	for _, v := range nofileRepos {
+		fmt.Println(v)
 	}
+}
 
+func download(configs []collectConfig, client *github.Client, username *string) (map[string]string, []string) {
 	collectRepos := make(map[string]string)
-	var nofile []string
+	var nofileRepos []string
 	for _, c := range configs {
 		var content string
 		switch c.UserType {
@@ -169,25 +162,53 @@ func main() {
 		if c.OutputFile != "" && content != "" {
 			collectRepos[c.OutputFile] = content
 		} else {
-			nofile = append(nofile, content)
+			nofileRepos = append(nofileRepos, content)
 		}
 	}
+	return collectRepos, nofileRepos
+}
 
-	if len(collectRepos) > 0 && *username != "" && *repository != "" && *branch != "" {
-		err := commit(client, *username, *repository, *branch, *commitAuthor, *commitEmail, collectRepos)
-		if err != nil {
-			fmt.Println("commit err", err)
-		}
+func newClient(token string) *github.Client {
+	var client *github.Client
+	if token != "" {
+		ts := oauth2.StaticTokenSource(
+			&oauth2.Token{AccessToken: token},
+		)
+		tc := oauth2.NewClient(context.Background(), ts)
+		client = github.NewClient(tc)
 	} else {
-		for k, v := range collectRepos {
-			if err := ioutil.WriteFile(k, []byte(v), 0644); err != nil {
-				fmt.Println("write file err:", err)
+		client = github.NewClient(nil)
+	}
+	return client
+}
+
+func buildConfig(config *string, username *string, file *string) ([]collectConfig, error) {
+	var configs []collectConfig
+
+	if *config == "" {
+		configs = append(configs, collectConfig{
+			Name:       *username,
+			UserType:   user,
+			OutputFile: *file,
+		})
+	} else {
+		configStr, err := ioutil.ReadFile(*config)
+		if err != nil {
+			return nil, err
+		}
+		err = yaml.Unmarshal(configStr, &configs)
+		if err != nil {
+			return nil, err
+		}
+		for i := 0; i < len(configs); {
+			if configs[i].UserType != user && configs[i].UserType != org {
+				configs = append(configs[:i], configs[i+1:]...)
+				continue
 			}
+			i++
 		}
 	}
-	for _, v := range nofile {
-		fmt.Println(v)
-	}
+	return configs, nil
 }
 
 func commit(client *github.Client, owner string, repo string, branch string,
