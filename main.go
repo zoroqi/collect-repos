@@ -60,13 +60,17 @@ func buildCollectContent(group []group) *strings.Builder {
 		sb.WriteString(fmt.Sprintf("## %s\n\n", v.name))
 		for _, repo := range v.repo {
 			description := strings.Replace(repo.GetDescription(), "\n", " ", -1)
-			sb.WriteString(fmt.Sprintf("- [%s](%s) %s %s\n", repo.GetFullName(), repo.GetHTMLURL(),
-				extend(repo), description))
+			sb.WriteString(fmt.Sprintf("- [%s](%s) %s %s %s\n", repo.GetFullName(), repo.GetHTMLURL(),
+				topics(repo), extend(repo), description))
 		}
 		sb.WriteString("\n")
 	}
 
 	return &sb
+}
+
+func topics(repo *github.Repository) string {
+	return fmt.Sprintf("topic:%s", strings.Join(repo.Topics, ","))
 }
 
 func extend(repo *github.Repository) string {
